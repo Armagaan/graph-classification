@@ -145,7 +145,7 @@ class NCI1Dataset(Dataset):
         return data
 
 
-# print('Loading ...')
-dataset = NCI1Dataset('data/NCI1/') # , 'data/NCI1/processed/'
-print('Number of graphs in dataset: ', len(dataset))
-dataset.plot_graph(3000)
+# # print('Loading ...')
+# dataset = NCI1Dataset('data/NCI1/') # , 'data/NCI1/processed/'
+# print('Number of graphs in dataset: ', len(dataset))
+# dataset.plot_graph(3000)
