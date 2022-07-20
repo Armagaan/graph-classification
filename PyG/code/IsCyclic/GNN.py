@@ -52,7 +52,9 @@ class GCN_IsCyclic(nn.Module):
         self.conv1 = GraphConvolution(in_features, h_features)
         self.conv2 = GraphConvolution(h_features, h_features)
         self.conv3 = GraphConvolution(h_features, h_features)
-        self.lin = Linear(h_features, n_classes)
+        self.dense1 = Linear(h_features, 16)
+        self.dense2 = Linear(16, 8)
+        self.dense3 = Linear(8, 1)
 
     def forward(self, feature_matrix, edge_index, batch):
         dense_adj = torch.sparse.FloatTensor(edge_index, torch.ones(edge_index.size(1)))
@@ -62,5 +64,10 @@ class GCN_IsCyclic(nn.Module):
         x = x.relu()
         x = self.conv3(x, dense_adj)
         x = global_mean_pool(x, batch=batch)
-        x = self.lin(x)
+        x = self.dense1(x)
+        x = x.relu()
+        x = self.dense2(x)
+        x = x.relu()
+        x = self.dense3(x)
+        x = torch.sigmoid(x)
         return x
