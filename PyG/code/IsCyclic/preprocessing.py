@@ -18,6 +18,7 @@ class isCyclicDataset(Dataset):
 
     @property
     def processed_file_names(self):
+        self.data = pickle.load(open(self.raw_paths[0],'rb'))
         return [f'data_{i}.pt' for i in range(951)] #951 graphs are present in the dataset
 
     def download(self):
@@ -124,12 +125,9 @@ def generate_acyclic_graphs():
     labels = np.zeros(len(acyclic))
     return acyclic, list(labels)
 
-def create_isCyclic_dataset(folder_path, saved=False):
-    if folder_path is None:
-        print("Please provide an argument for folder_path.")
-        exit(1)
+def create_isCyclic_dataset(saved=False):
     if(saved == False):
-        cyclic, labels1 = generate_cyclic_graphs()
+        cyclic, labels1 = generate_cyclic_graphs() 
         acyclic, labels0 = generate_acyclic_graphs()
         # nx.draw(cyclic[30])
         # plt.savefig('cyclic.png')
@@ -139,8 +137,8 @@ def create_isCyclic_dataset(folder_path, saved=False):
 
         dataset = cyclic + acyclic
         labels = labels1 + labels0
-        f = open(f'{folder_path}/raw/dataset.pkl', 'wb')
-        lf = open(f'{folder_path}/raw/labels.pkl', 'wb')
+        f = open('../../../data/IsCyclic/raw/dataset.pkl', 'wb')
+        lf = open('../../../data/IsCyclic/raw/labels.pkl', 'wb')
         pickle.dump(dataset,f)
         pickle.dump(labels,lf)
         f.close()
@@ -148,16 +146,17 @@ def create_isCyclic_dataset(folder_path, saved=False):
         print("No of cyclic graphs: ", len(cyclic))
         print("No of acyclic graphs: ", len(acyclic))
         print("Dataset size: ", len(cyclic) + len(acyclic))
+        # print(labels)
     else:
-        f = open(f'{folder_path}/raw/dataset.pkl', 'rb')
-        lf = open(f'{folder_path}/raw/labels.pkl', 'rb')
+        f = open('../../../data/IsCyclic/raw/dataset.pkl', 'rb')
+        lf = open('../../../data/IsCyclic/raw/labels.pkl', 'rb')
         dataset = pickle.load(f)
         labels = pickle.load(lf)
         f.close()
         lf.close()
         print("Dataset size: ", len(dataset))
 
-    data_obj = isCyclicDataset(root=folder_path)
+    data_obj = isCyclicDataset(root ='../../../data/IsCyclic/')
 
     pytorch_data_obj = []
     for i in range(len(dataset)):
@@ -172,6 +171,7 @@ def create_isCyclic_dataset(folder_path, saved=False):
         pytorch_data_obj.append(data)
 
     return data_obj, pytorch_data_obj
+    # return dataset, pytorch_data_obj
 
 # dataset, data_objs = create_isCyclic_dataset(saved=True) #saved=True
 # print(dataset[0].x)
