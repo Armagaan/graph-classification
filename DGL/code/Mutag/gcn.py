@@ -72,8 +72,8 @@ class GCNGraph(torch.nn.Module):
 
     def forward(self, g, in_feat, e_weight):
         mat_size = int(math.sqrt(e_weight.size(0)))
-        dense = e_weight.reshape(mat_size, mat_size)
-        sparse_adj = dense.to_sparse()
+        dense_adj = e_weight.reshape(mat_size, mat_size)
+        sparse_adj = dense_adj.to_sparse()
 
         h = self.conv1(in_feat, sparse_adj)
         h = torch.nn.functional.relu(h)
