@@ -47,7 +47,7 @@ class GraphConvolution(nn.Module):
 
 
 class GCN_Mutag(nn.Module):
-    def __init__(self, in_features, h_features, n_classes) -> None:
+    def __init__(self, in_features, h_features) -> None:
         super(GCN_Mutag, self).__init__()
         self.conv1 = GraphConvolution(in_features, h_features)
         self.conv2 = GraphConvolution(h_features, h_features)
@@ -57,12 +57,12 @@ class GCN_Mutag(nn.Module):
         self.dense3 = Linear(8, 1)
 
     def forward(self, feature_matrix, edge_index, batch):
-        dense_adj = torch.sparse.FloatTensor(edge_index, torch.ones(edge_index.size(1)))
-        x = self.conv1(feature_matrix, dense_adj)
+        sparse_adj = torch.sparse.FloatTensor(edge_index, torch.ones(edge_index.size(1)))
+        x = self.conv1(feature_matrix, sparse_adj)
         x = x.relu()
-        x = self.conv2(x, dense_adj)
+        x = self.conv2(x, sparse_adj)
         x = x.relu()
-        x = self.conv3(x, dense_adj)
+        x = self.conv3(x, sparse_adj)
         x = global_mean_pool(x, batch=batch)
         x = self.dense1(x)
         x = x.relu()
