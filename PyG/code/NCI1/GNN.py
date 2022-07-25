@@ -58,11 +58,12 @@ class GCN_NCI1(nn.Module):
 
     def forward(self, feature_matrix, edge_index, batch):
         sparse_adj = torch.sparse.FloatTensor(edge_index, torch.ones(edge_index.size(1)))
-        x = self.conv1(feature_matrix, sparse_adj)
+        dense_adj = sparse_adj.to_dense()
+        x = self.conv1(feature_matrix, dense_adj)
         x = x.relu()
-        x = self.conv2(x, sparse_adj)
+        x = self.conv2(x, dense_adj)
         x = x.relu()
-        x = self.conv3(x, sparse_adj)
+        x = self.conv3(x, dense_adj)
         x = global_mean_pool(x, batch=batch)
         x = self.dense1(x)
         x = x.relu()

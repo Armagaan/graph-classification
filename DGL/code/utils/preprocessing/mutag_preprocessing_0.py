@@ -16,11 +16,11 @@ class MutagDataset0(DGLDataset):
             self.load_path = load_path
             self.load_()
         else:
-            # for i in range(len(graph_labels)):
-            #     if graph_labels[i] == 1:
-            #         graph_labels[i] = 0
-            #     else:
-            #         graph_labels[i] = 1
+            for i in range(len(graph_labels)):
+                if graph_labels[i] == 1:
+                    graph_labels[i] = 0
+                else:
+                    graph_labels[i] = 1
 
             self.edges = edges
             self.graph_indicator = graph_indicator

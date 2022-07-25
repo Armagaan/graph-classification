@@ -87,7 +87,7 @@ class GCNGraph(torch.nn.Module):
         h = self.dense2(h)
         h = torch.nn.functional.relu(h)
         h = self.dense3(h)
-        h = torch.sigmoid(h)
+        h = torch.sigmoid(-h)
         return h
 
 
