@@ -56,7 +56,7 @@ class GCN_Mutag(nn.Module):
         self.conv5 = GraphConvolution(h_features, h_features)
         self.dense1 = Linear(h_features, 16)
         self.dense2 = Linear(16, 8)
-        self.dense3 = Linear(8, 1)
+        self.dense3 = Linear(8, 2)
 
     def forward(self, feature_matrix, edge_index, batch):
         sparse_adj = torch.sparse.FloatTensor(edge_index, torch.ones(edge_index.size(1)))
@@ -66,11 +66,15 @@ class GCN_Mutag(nn.Module):
         x = self.conv2(x, dense_adj)
         x = x.relu()
         x = self.conv3(x, dense_adj)
+        x = x.relu()
+        x = self.conv4(x, dense_adj)
+        x = x.relu()
+        x = self.conv5(x, dense_adj)
         x = global_mean_pool(x, batch=batch)
         x = self.dense1(x)
         x = x.relu()
         x = self.dense2(x)
         x = x.relu()
         x = self.dense3(x)
-        x = torch.sigmoid(x)
+        # x = torch.softmax(x, dim=-1)
         return x
