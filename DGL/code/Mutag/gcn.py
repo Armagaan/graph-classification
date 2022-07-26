@@ -5,7 +5,7 @@ from dgl.nn.pytorch import GraphConv
 import numpy as np
 import torch
 from torch.nn import Linear
-from torch.nn.functional import dropout, relu, softmax
+from torch.nn.functional import dropout, relu, softmax, log_softmax
 from torch.nn.parameter import Parameter
 
 # class GCNGraphNew(torch.nn.Module):
@@ -60,26 +60,32 @@ class GraphConvLayer(torch.nn.Module):
         return output
 
 
-class GCNGraph(torch.nn.Module):
+class GCNGraph_Mutag(torch.nn.Module):
     def __init__(self, in_feats, h_feats):
-        super(GCNGraph, self).__init__()
+        super(GCNGraph_Mutag, self).__init__()
         self.conv1 = GraphConvLayer(in_feats, h_feats)
         self.conv2 = GraphConvLayer(h_feats, h_feats)
         self.conv3 = GraphConvLayer(h_feats, h_feats)
-        self.dense1 = torch.nn.Linear(h_feats, 16)
-        self.dense2 = torch.nn.Linear(16, 8)
-        self.dense3 = torch.nn.Linear(8, 1)
+        self.conv4 = GraphConvLayer(h_feats, h_feats)
+        self.conv5 = GraphConvLayer(h_feats, h_feats)
+        self.dense1 = Linear(h_feats, 16)
+        self.dense2 = Linear(16, 8)
+        self.dense3 = Linear(8, 2)
 
     def forward(self, g, in_feat, e_weight):
         mat_size = int(math.sqrt(e_weight.size(0)))
         dense_adj = e_weight.reshape(mat_size, mat_size)
-        sparse_adj = dense_adj.to_sparse()
+        # sparse_adj = dense_adj.to_sparse()
 
-        h = self.conv1(in_feat, sparse_adj)
-        h = torch.nn.functional.relu(h)
-        h = self.conv2(h, sparse_adj)
-        h = torch.nn.functional.relu(h)
-        h = self.conv3(h, sparse_adj)
+        h = self.conv1(in_feat, dense_adj)
+        h = relu(h)
+        h = self.conv2(h, dense_adj)
+        h = relu(h)
+        h = self.conv3(h, dense_adj)
+        h = relu(h)
+        h = self.conv4(h, dense_adj)
+        h = relu(h)
+        h = self.conv5(h, dense_adj)
         g.ndata['h'] = h
         h = dgl.readout_nodes(g, 'h', op='mean') # pooling
         h = self.dense1(h)
@@ -87,7 +93,7 @@ class GCNGraph(torch.nn.Module):
         h = self.dense2(h)
         h = torch.nn.functional.relu(h)
         h = self.dense3(h)
-        h = torch.sigmoid(-h)
+        h = softmax(-h, dim=-1)
         return h
 
 
