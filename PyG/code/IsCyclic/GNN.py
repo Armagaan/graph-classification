@@ -54,7 +54,7 @@ class GCN_IsCyclic(nn.Module):
         self.conv3 = GraphConvolution(h_features, h_features)
         self.dense1 = Linear(h_features, 16)
         self.dense2 = Linear(16, 8)
-        self.dense3 = Linear(8, 1)
+        self.dense3 = Linear(8, 2)
 
     def forward(self, feature_matrix, edge_index, batch):
         sparse_adj = torch.sparse.FloatTensor(edge_index, torch.ones(edge_index.size(1)))
@@ -69,5 +69,4 @@ class GCN_IsCyclic(nn.Module):
         x = self.dense2(x)
         x = x.relu()
         x = self.dense3(x)
-        x = torch.sigmoid(x)
         return x
