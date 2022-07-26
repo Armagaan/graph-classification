@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 from torch.nn import Linear
 from torch.nn.parameter import Parameter
+from torch.nn.functional import log_softmax
 from torch_geometric.nn import global_mean_pool, GCNConv
 
 class GraphConvolution(nn.Module):
@@ -47,20 +48,34 @@ class GraphConvolution(nn.Module):
 
 
 class GCN_NCI1(nn.Module):
-    def __init__(self, in_features, h_features, n_classes) -> None:
+    def __init__(self, in_features, h_features) -> None:
         super(GCN_NCI1, self).__init__()
         self.conv1 = GraphConvolution(in_features, h_features)
         self.conv2 = GraphConvolution(h_features, h_features)
-        self.conv3 = GraphConvolution(h_features, h_features)
-        self.lin = Linear(h_features, n_classes)
+        # self.conv3 = GraphConvolution(h_features, h_features)
+        # self.conv4 = GraphConvolution(h_features, h_features)
+        # self.conv5 = GraphConvolution(h_features, h_features)
+        self.dense1 = Linear(h_features, 16)
+        self.dense2 = Linear(16, 8)
+        self.dense3 = Linear(8, 2)
 
     def forward(self, feature_matrix, edge_index, batch):
-        dense_adj = torch.sparse.FloatTensor(edge_index, torch.ones(edge_index.size(1)))
+        sparse_adj = torch.sparse.FloatTensor(edge_index, torch.ones(edge_index.size(1)))
+        dense_adj = sparse_adj.to_dense()
         x = self.conv1(feature_matrix, dense_adj)
         x = x.relu()
         x = self.conv2(x, dense_adj)
-        x = x.relu()
-        x = self.conv3(x, dense_adj)
+        # x = x.relu()
+        # x = self.conv3(x, dense_adj)
+        # x = x.relu()
+        # x = self.conv4(x, dense_adj)
+        # x = x.relu()
+        # x = self.conv5(x, dense_adj)
         x = global_mean_pool(x, batch=batch)
-        x = self.lin(x)
+        x = self.dense1(x)
+        x = x.relu()
+        x = self.dense2(x)
+        x = x.relu()
+        x = self.dense3(x)
+        x = log_softmax(x, dim=-1)
         return x
