@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 from torch.nn import Linear
 from torch.nn.parameter import Parameter
+from torch.nn.functional import log_softmax
 from torch_geometric.nn import global_mean_pool, GCNConv
 
 class GraphConvolution(nn.Module):
@@ -76,5 +77,5 @@ class GCN_Mutag(nn.Module):
         x = self.dense2(x)
         x = x.relu()
         x = self.dense3(x)
-        # x = torch.softmax(x, dim=-1)
+        x = log_softmax(x, dim=-1)
         return x
